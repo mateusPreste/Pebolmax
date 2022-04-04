@@ -1,9 +1,13 @@
-[dependencias]
+# Pebolmax
+
+## __
+
+#### [dependencias]
 streamlink - cli utility for pipe video streams
 mpv - supported video player 
 
-[how to use]
+### [how to use]
 just run "python run.py"
 
-[changelog]
+### [changelog]
 v1.0 - only supports futemax live games and mpv player
