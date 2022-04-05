@@ -3,8 +3,8 @@
 ## __
 
 #### [dependencias]
-streamlink - cli utility for pipe video streams
-mpv - supported video player 
+- streamlink - cli utility for pipe video streams
+- mpv - supported video player 
 
 ### [how to use]
 just run "python run.py"
