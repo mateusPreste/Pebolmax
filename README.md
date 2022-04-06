@@ -8,6 +8,11 @@
 - mpv - supported video player 
 
 #### [ubuntu]
+Installing via shell script 
+ $ ./install.sh
+ 
+ or
+ 
 Installing dependencies manually
 
 Installing streamlink
@@ -18,10 +23,6 @@ Installing mpv
  
 Installing python dependencies:
  $ pip install -r requirements.txt
- 
- or
- 
- $ ./install.sh
 
 #### [arch]
 
