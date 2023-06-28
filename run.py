@@ -162,7 +162,7 @@ def returnLink(code):
     #print(exc_type, fname, exc_tb.tb_lineno)
 
 def genEvents():
-  URL = "https://futemax.gratis/"
+  URL = "https://futemax.app/"
     
   r = requests.get(url = URL)
 
@@ -218,19 +218,21 @@ def main():
 
   endpoints = returnEndpointList([linkOptions[optionChoosed]])
   endpoint = endpoints[0]
+  
 
-  cmd = f'streamlink \'{endpoint}\' best --http-header \'User-Agent= Mozilla/5.0 (X11; Linux x86_64; rv:98.0) Gecko/20100101 Firefox/98.0\' \
+  cmd = f'streamlink \'{endpoint}\' best --http-header \'User-Agent= Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/113.0\' \
                  --http-header \'Accept= */*\' \
                  --http-header \'Accept-Language= en-US,en;q=0.5\' \
                  --http-header \'Accept-Encoding= gzip, deflate, br\' \
-                 --http-header \'Origin= https://futemax.gratis\' \
+                 --http-header \'Origin= https://futemax.app\' \
                  --http-header \'Sec-Fetch-Dest= empty\' \
                  --http-header \'Sec-Fetch-Mode= cors\' \
                  --http-header \'Sec-Fetch-Site= cross-site\' \
-                 --http-header \'Referer= https://futemax.gratis/\' \
+                 --http-header \'Referer= https://futemax.app/\' \
+                 --http-header \'DNT= 1\' \
                  --http-header \'Connection= keep-alive\' \
                  --http-header \'Pragma= no-cache\' \
-                 --http-header \'Cache-Control= no-cache\' --player-passthrough \'http\' --player \'mpv\''
+                 --http-header \'Cache-Control= no-cache\' --player-passthrough \'https\' --player \'vlc\''
 
   os.system(cmd)
 
