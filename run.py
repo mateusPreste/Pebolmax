@@ -161,6 +161,17 @@ def returnLink(code):
     #fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
     #print(exc_type, fname, exc_tb.tb_lineno)
 
+
+
+import os    
+def interpreter(line):
+    command = os.system(f'cmd /c "{line}"')
+    return command
+
+
+
+
+
 def genEvents():
   URL = "https://futemax.app/"
     
@@ -196,7 +207,8 @@ def main():
 
   for ind, link in enumerate(linksList):
     showText = re.sub(r'Assistir|ao vivo|online', '', link[1])
-    print('|', ind, '|', showText)
+    print(showText[1])
+    print(f'|{ind}|{showText}')
 
   print()
 
@@ -234,6 +246,12 @@ def main():
                  --http-header \'Pragma= no-cache\' \
                  --http-header \'Cache-Control= no-cache\' --player-passthrough \'https\' --player \'vlc\''
 
-  os.system(cmd)
+  print(cmd)
+
+  if os.name == 'nt':
+    interpreter(cmd.replace("\'", "\""))
+  else:
+    os.system(cmd)
+  
 
 main()
