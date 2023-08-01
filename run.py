@@ -207,7 +207,6 @@ def main():
 
   for ind, link in enumerate(linksList):
     showText = re.sub(r'Assistir|ao vivo|online', '', link[1])
-    print(showText[1])
     print(f'|{ind}|{showText}')
 
   print()
@@ -220,7 +219,7 @@ def main():
   print('-- Opções de transmissão: --')
   for ind, opt in enumerate(options):
     showText = opt[1]
-    print("|", ind, "|", showText)
+    print("|", ind, "|", showText, opt[0])
 
   linkOptions = [el[0] for el in options]
 
@@ -229,6 +228,7 @@ def main():
   print()
 
   endpoints = returnEndpointList([linkOptions[optionChoosed]])
+  print('endpoints', endpoints)
   endpoint = endpoints[0]
   
 

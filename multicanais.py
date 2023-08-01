@@ -2,6 +2,54 @@ import requests
 from bs4 import BeautifulSoup
 import json
 
+from seleniumwire.webdriver import Chrome, ChromeOptions
+
+supported_sources = ['embedflix', 'v3.sportsonline.sx', 'youtube.com']
+
+def verifysource(source):
+    for s in supported_sources:
+        if s in source:
+            return True
+    return False
+
+def getSourceName(link):
+    for s in supported_sources:
+        if s in link:
+            return s
+    return "UNSUPPORTED"
+
+def getVideoSportsOnlineInfo(url):
+    print('Obtendo as informações do video')
+    chrome_options = ChromeOptions()
+    
+    chrome_options.add_argument('--headless')
+    driver = Chrome(options=chrome_options)
+    driver.get(url)
+    r = driver.requests
+    
+    videoUrl, videoOrigin = '',''
+    for request in driver.requests:
+        if (request.response and "m3u8" in request.url):
+            videoUrl = request.url
+            videoOrigin = request.headers['Origin']
+            
+    if(videoOrigin == '' or videoUrl == ''):
+        print('ERROR: Não foi possivel obter as informações sobre a transmissão.')
+        
+    return [videoUrl, videoOrigin]
+
+def selectSource(session, source, link):
+    if(source == 'embedflix'):
+        return getEmbedflix(session, link)
+    elif(source == 'v3.sportsonline.sx'):
+        return getVideoSportsOnlineInfo(link)
+    elif(source == 'youtube.com'):
+        link = link.replace(' ', '').replace('\'', '')
+        return [link, '']
+    elif(source == 'UNSUPPORTED'):
+        print('Essa fonte não é suportada')
+        exit(0)
+
 def getTodayGames(session, url):
     get_page = session.get(url)
     
@@ -28,13 +76,13 @@ def getGameOptions(session, title, link):
     eachOption = options[0].find_all("a")
     optionList = []
     for option in eachOption:
-        optionName = option.text
         optionLink = option['data-url']
+        optionName = getSourceName(optionLink)
         #print(optionName, optionLink)
-        if('embedflix' in optionLink):
+        if(verifysource(optionLink)):
             optionList.append([optionName, optionLink])
         else:
-            optionList.append([optionName+' INDISPONIVEL', optionLink])
+            optionList.append([optionName, optionLink])
     return optionList
 
 import re
@@ -70,11 +118,13 @@ def getEmbedflix(session, link):
     #print(response.text)
     #line = match_string('let video_id =', response.text)
     videoId = match_string('let video_id =([^;]+)', response.text)
-    print('videoId', videoId)
+    action = match_string('action      : ([^,]+)', response.text)
+    action = action.split(' ')[-1].replace('\'','')
+    print('videoId', videoId, 'action', action)
     
     url = "https://embedflix.net/api"
 
-    payload = f'action=getPlayer&client_ip=187.46.89.113&video_id={videoId}'
+    payload = f'action={action}&client_ip=187.46.89.113&video_id={videoId}'
     headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/115.0',
     'Accept': '*/*',
@@ -97,9 +147,10 @@ def getEmbedflix(session, link):
 
     response = requests.request("POST", url, headers=headers, data=payload, timeout=1000)
     jsonResponse = json.loads(response.text)
+    #print(jsonResponse)
     url = jsonResponse['data']['video_url'] + '?wmsAuthSign=' + jsonResponse['data']['url_signature']
-    print(url)
-    showVideo(url, 'https://embedflix.net')
+    #print(url)
+    return [url, 'https://embedflix.net']
     
 import os    
 def interpreter(line):
@@ -150,10 +201,10 @@ def main():
     
     optionNumber = input('Escolha uma opção: ')
     
-
-    
-    name, olink = optionList[0]
+    source, olink = optionList[int(optionNumber)]
     print(optionList)
-    getEmbedflix(session, olink)
+    [videoUrl, originUrl] = selectSource(session, source, olink)
+    
+    showVideo(videoUrl, originUrl)
     
 main()
