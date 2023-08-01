@@ -2,3 +2,4 @@ beautifulsoup4==4.10.0
 regex==2021.11.10
 selenium==4.10.0
 selenium-wire==5.1.0
+streamlink==6.0.0

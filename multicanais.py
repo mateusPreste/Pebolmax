@@ -120,11 +120,13 @@ def getEmbedflix(session, link):
     videoId = match_string('let video_id =([^;]+)', response.text)
     action = match_string('action      : ([^,]+)', response.text)
     action = action.split(' ')[-1].replace('\'','')
+    ip_address = requests.get('https://api.ipify.org').text
+    
     print('videoId', videoId, 'action', action)
     
     url = "https://embedflix.net/api"
 
-    payload = f'action={action}&client_ip=187.46.89.113&video_id={videoId}'
+    payload = f'action={action}&client_ip={ip_address}&video_id={videoId}'
     headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/115.0',
     'Accept': '*/*',
@@ -147,7 +149,7 @@ def getEmbedflix(session, link):
 
     response = requests.request("POST", url, headers=headers, data=payload, timeout=1000)
     jsonResponse = json.loads(response.text)
-    #print(jsonResponse)
+    print(jsonResponse)
     url = jsonResponse['data']['video_url'] + '?wmsAuthSign=' + jsonResponse['data']['url_signature']
     #print(url)
     return [url, 'https://embedflix.net']
@@ -159,19 +161,25 @@ def interpreter(line):
 
 
 def showVideo(endpoint, origin):
-    cmd = f'streamlink \'{endpoint}\' best --http-header \'User-Agent= Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/113.0\' \
-                --http-header \'Accept= */*\' \
-                --http-header \'Accept-Language= en-US,en;q=0.5\' \
-                --http-header \'Accept-Encoding= gzip, deflate, br\' \
-                --http-header \'Origin= {origin}\' \
-                --http-header \'Sec-Fetch-Dest= empty\' \
-                --http-header \'Sec-Fetch-Mode= cors\' \
-                --http-header \'Sec-Fetch-Site= cross-site\' \
-                --http-header \'Referer= {origin}/\' \
-                --http-header \'DNT= 1\' \
-                --http-header \'Connection= keep-alive\' \
-                --http-header \'Pragma= no-cache\' \
-                --http-header \'Cache-Control= no-cache\' --player-passthrough \'https\' --player \'vlc\''
+    print('endpoint', endpoint)
+    print('origin', origin)
+    
+    cmd = f'streamlink \'{endpoint}\' best --http-header \'User-Agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/115.0\' \
+        --http-header \'Accept= */*\' \
+        --http-header \'Accept-Language= en-US,en;q=0.5\' \
+        --http-header \'Accept-Encoding= gzip, deflate, br\' \
+        --http-header \'Origin= {origin}\' \
+        --http-header \'Sec-Fetch-Dest= empty\' \
+        --http-header \'Sec-Fetch-Mode= cors\' \
+        --http-header \'Sec-Fetch-Site= cross-site\' \
+        --http-header \'Referer= {origin}/\' \
+        --http-header \'DNT= 1\' \
+        --http-header \'Connection= keep-alive\' \
+        --http-header \'Pragma= no-cache\' \
+        --http-header \'Cache-Control= no-cache\' --player-passthrough \'https\' --player \'vlc\''
+        
+    if(origin==''):
+        cmd = f'vlc \"$(yt-dlp --get-url --format best \'{endpoint}\')\"'
 
     print(cmd)
 
