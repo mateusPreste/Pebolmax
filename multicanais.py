@@ -3,8 +3,10 @@ from bs4 import BeautifulSoup
 import json
 
 from seleniumwire.webdriver import Chrome, ChromeOptions
+from sportsonline import SportsOnline
+from cloudflare import CloudFlareHandler
 
-supported_sources = ['embedflix', 'v3.sportsonline.sx', 'youtube.com']
+supported_sources = ['embedflix', 'v3.sportsonline.sx', 'youtube.com', 'cloudflarestream']
 
 def verifysource(source):
     for s in supported_sources:
@@ -18,34 +20,19 @@ def getSourceName(link):
             return s
     return "UNSUPPORTED"
 
-def getVideoSportsOnlineInfo(url):
-    print('Obtendo as informações do video')
-    chrome_options = ChromeOptions()
-    
-    chrome_options.add_argument('--headless')
-    driver = Chrome(options=chrome_options)
-    driver.get(url)
-    r = driver.requests
-    
-    videoUrl, videoOrigin = '',''
-    for request in driver.requests:
-        if (request.response and "m3u8" in request.url):
-            videoUrl = request.url
-            videoOrigin = request.headers['Origin']
-            
-    if(videoOrigin == '' or videoUrl == ''):
-        print('ERROR: Não foi possivel obter as informações sobre a transmissão.')
-        
-    return [videoUrl, videoOrigin]
-
 def selectSource(session, source, link):
+    link = link.replace(' ', '')
     if(source == 'embedflix'):
         return getEmbedflix(session, link)
     elif(source == 'v3.sportsonline.sx'):
-        return getVideoSportsOnlineInfo(link)
+        handler = SportsOnline(link)
+        return handler.getLink()
     elif(source == 'youtube.com'):
         link = link.replace(' ', '').replace('\'', '')
         return [link, '']
+    elif(source == 'cloudflarestream'):
+        handler = CloudFlareHandler(link)
+        return handler.getLink()
     elif(source == 'UNSUPPORTED'):
         print('Essa fonte não é suportada')
         exit(0)
@@ -161,9 +148,6 @@ def interpreter(line):
 
 
 def showVideo(endpoint, origin):
-    print('endpoint', endpoint)
-    print('origin', origin)
-    
     cmd = f'streamlink \'{endpoint}\' best --http-header \'User-Agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/115.0\' \
         --http-header \'Accept= */*\' \
         --http-header \'Accept-Language= en-US,en;q=0.5\' \
@@ -210,7 +194,6 @@ def main():
     optionNumber = input('Escolha uma opção: ')
     
     source, olink = optionList[int(optionNumber)]
-    print(optionList)
     [videoUrl, originUrl] = selectSource(session, source, olink)
     
     showVideo(videoUrl, originUrl)
