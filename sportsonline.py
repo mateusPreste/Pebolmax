@@ -41,7 +41,7 @@ class SportsOnline():
 
         return [authority, response.text]
 
-    def parseScript(self, content):
+    def parseScript(self, content) -> str:
         soup = BeautifulSoup(content, "html.parser")
         scripts = soup.find_all('script')
         
@@ -62,7 +62,7 @@ class SportsOnline():
         matches = [cont for cont in matches if 'https' in cont]
         return matches[0]
     
-    def getLink(self):
+    def getLink(self) -> list[str]:
         content = self.getPage(self.url)
     
         soup = BeautifulSoup(content, "html.parser")

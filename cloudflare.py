@@ -5,7 +5,7 @@ class CloudFlareHandler():
     def __init__(self, url):
         self.url = url
     
-    def getLink(self):
+    def getLink(self) -> list[str]:
         content = requests.get(self.url).content
         soup = BeautifulSoup(content, "html.parser")
         scripts = soup.find_all('stream')

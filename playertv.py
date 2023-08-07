@@ -50,7 +50,7 @@ class PlayerTV():
                         
         return links[0]
     
-    def getLink(self):
+    def getLink(self) -> list[str]:
         content = self.getPage(self.url)
         link = self.parseScript(content)
 

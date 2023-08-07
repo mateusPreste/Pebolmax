@@ -22,7 +22,7 @@ def getSourceName(link):
             return s
     return "UNSUPPORTED"
 
-def selectSource(session, source, link):
+def selectSource(session, source, link) -> list[str]:
     link = link.replace(' ', '')
     if(source == 'embedflix'):
         return getEmbedflix(session, link)
@@ -38,9 +38,9 @@ def selectSource(session, source, link):
     elif(source == 'playertv'):
         handler = PlayerTV(link)
         return handler.getLink()
-    elif(source == 'UNSUPPORTED'):
-        print('Essa fonte não é suportada')
-        exit(0)
+    
+    print('Essa fonte não é suportada')
+    raise RuntimeError('This source is not supported')
 
 def getTodayGames(session, url):
     get_page = session.get(url)
@@ -83,7 +83,7 @@ def match_string(string, text):
     return re.search(string, text).group(0).split(' = ')[-1]
 
         
-def getEmbedflix(session, link):
+def getEmbedflix(session, link) -> list[str]:
     link = link.replace(" ", "")
     url = link
 
