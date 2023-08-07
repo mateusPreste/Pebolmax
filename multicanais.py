@@ -5,8 +5,10 @@ import json
 from seleniumwire.webdriver import Chrome, ChromeOptions
 from sportsonline import SportsOnline
 from cloudflare import CloudFlareHandler
+from videoThreads import videoThread
+from playertv import PlayerTV
 
-supported_sources = ['embedflix', 'v3.sportsonline.sx', 'youtube.com', 'cloudflarestream']
+supported_sources = ['embedflix', 'v3.sportsonline.sx', 'youtube.com', 'cloudflarestream', 'playertv']
 
 def verifysource(source):
     for s in supported_sources:
@@ -32,6 +34,9 @@ def selectSource(session, source, link):
         return [link, '']
     elif(source == 'cloudflarestream'):
         handler = CloudFlareHandler(link)
+        return handler.getLink()
+    elif(source == 'playertv'):
+        handler = PlayerTV(link)
         return handler.getLink()
     elif(source == 'UNSUPPORTED'):
         print('Essa fonte não é suportada')
@@ -168,7 +173,7 @@ def showVideo(endpoint, origin):
     print(cmd)
 
     if os.name == 'nt':
-        interpreter(cmd.replace("\'", "\""))
+        interpreter(cmd.replace("\'", "\"").replace('&', '^&'))
     else:
         os.system(cmd)
     
@@ -193,9 +198,20 @@ def main():
     
     optionNumber = input('Escolha uma opção: ')
     
-    source, olink = optionList[int(optionNumber)]
-    [videoUrl, originUrl] = selectSource(session, source, olink)
+    streamlist = []
     
-    showVideo(videoUrl, originUrl)
+    if(optionNumber == '-1'):
+        for source, olink in optionList:
+            if(source != "UNSUPPORTED"):
+                [videoUrl, originUrl] = selectSource(session, source, olink)
+                streamlist.append([videoUrl, originUrl])
+    else:
+        source, olink = optionList[int(optionNumber)]
+        [videoUrl, originUrl] = selectSource(session, source, olink)
+        streamlist.append([videoUrl, originUrl])
+    
+    for videoUrl, originUrl in streamlist:
+        thread = videoThread(videoUrl, originUrl)
+        thread.start()
     
 main()
