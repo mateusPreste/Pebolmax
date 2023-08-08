@@ -20,7 +20,7 @@ import os
 
 url = 'https://sinalpublico.com/player3/ch.php?canal=espn4'
 
-p = subprocess.Popen(f'chromium --remote-debugging-port=9222 --remote-allow-origins=* --window-position=0,0 --window-size=0,0 {url}', shell=True)
+p = subprocess.Popen(f'chromium --remote-debugging-port=9222 --remote-allow-origins=* --window-position=0,0 --window-size=0,0 --disable-session-crashed-bubble {url}', shell=True)
 
 if os.name != 'nt':
     time.sleep(1)
