@@ -5,36 +5,46 @@ import subprocess
 import psutil
 
 from videoThreads import videoThread
+import json
 
-devnull = open('/dev/null', 'w')
+from bs4 import BeautifulSoup
+import re
+import os
+
+#devnull = open('/dev/null', 'w')
 
 #SW_HIDE = 0
 #info = subprocess.STARTUPINFO()
 #info.dwFlags = subprocess.STARTF_USESHOWWINDOW
 #info.wShowWindow = SW_HIDE
 
-p = subprocess.Popen("chromium --remote-debugging-port=9222 --remote-allow-origins=* --window-position=0,0 --window-size=0,0", stdout=devnull, shell=True)
+url = 'https://sinalpublico.com/player3/ch.php?canal=espn4'
 
-time.sleep(1)
+p = subprocess.Popen(f'chromium --remote-debugging-port=9222 --remote-allow-origins=* --window-position=0,0 --window-size=0,0 {url}', shell=True)
+
+if os.name != 'nt':
+    time.sleep(1)
+    
 chrome = PyChromeDevTools.ChromeInterface()
 
 chrome.Network.enable()
 chrome.Page.enable()
 
-chrome.Page.navigate(url="https://sinalpublico.com/player3/ch.php?canal=espn4")
-event,messages=chrome.wait_event("Page.frameStoppedLoading", timeout=60)
-
-
-for m in messages:
-    #print(m)
-    if "method" in m and m["method"] == "Network.responseReceived":
-        try:
-            url=m["params"]["response"]["url"]
-     #       print (url)
-        except:
-            pass
+#chrome.Page.navigate(url="https://sinalpublico.com/player3/ch.php?canal=espn4")
+#event,messages=chrome.wait_event("Page.frameStoppedLoading", timeout=60)
+#
+#
+#for m in messages:
+#    #print(m)
+#    if "method" in m and m["method"] == "Network.responseReceived":
+#        try:
+#            url=m["params"]["response"]["url"]
+#     #       print (url)
+#        except:
+#            pass
         
-value = chrome.wait_event("Network.responseReceived", timeout=60)
+#value = chrome.wait_event("Network.responseReceived", timeout=60)
+#print('finished')
 #reqid = value[0]['params']['requestId']
 #print("reqid: ", reqid)
 #responses = chrome.Network.getResponseBody(requestId=reqid)
@@ -44,25 +54,39 @@ value = chrome.wait_event("Network.responseReceived", timeout=60)
     #print(response)
         
 #value = chrome.wait_event("DOMDebugger.getEventListeners", timeout=5)
-time.sleep(2)
+time.sleep(1)
 
 file_js = "onSubmit()"
 chrome.Runtime.evaluate(expression=file_js)
 
-event,messages=chrome.wait_event("Page.frameStoppedLoading", timeout=2)
+message=chrome.wait_message()
+reqid = message['params']['requestId']
 
+data = chrome.wait_event("Network.requestWillBeSent",timeout=60)
+responses = chrome.Network.getResponseBody(requestId=reqid)
+#js = json.loads(responses)
+print()
+
+body = ''
 streamLinks = []
-
-for m in messages:
-    if "method" in m and m["method"] == "Network.responseReceived":
-        try:
-            url=m["params"]["response"]["url"]
-            if("m3u8" in url):
-                streamLinks.append(url)
-               #print(m['params'])
-        except:
-            pass
+for r in responses:
+    if(type(r) == dict):
+        js = json.dumps(r)
+        js = json.loads(js)
+        body = js['result']['body']
+    #print(type(r))
+    #print(r)
+    
+soup = BeautifulSoup(body, 'html.parser')
+scripts = soup.find_all('script')
+for script in scripts:
+    code = script.get_text()
+    if('player.src' in code):
         
+        pattern = r"\"(.*?)\""
+        matches = re.findall(pattern, code)
+        streamLinks = [match for match in matches if 'm3u8' in match]
+
 pid = p.pid
 parent = psutil.Process(pid)
 for child in parent.children(recursive=True):  # or parent.children() for recursive=False
