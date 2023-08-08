@@ -10,6 +10,7 @@ import json
 from bs4 import BeautifulSoup
 import re
 import os
+import requests
 
 #devnull = open('/dev/null', 'w')
 
@@ -19,19 +20,37 @@ import os
 #info.wShowWindow = SW_HIDE
 
 url = 'https://sinalpublico.com/player3/ch.php?canal=espn4'
+windowoptions = '--window-position=0,0 --window-size=0,0'
 
-p = subprocess.Popen(f'chromium --remote-debugging-port=9222 --remote-allow-origins=* --window-position=0,0 --window-size=0,0 --disable-session-crashed-bubble {url}', shell=True)
+p = subprocess.Popen(f'chromium --remote-debugging-port=9222 --remote-allow-origins=* {windowoptions} --disable-session-crashed-bubble {url}', shell=True)
 
-if os.name != 'nt':
-    time.sleep(1)
+#time.sleep(1)
+ 
+chrome = None
+for trynum in range(5):
+    try:      
+        chrome = PyChromeDevTools.ChromeInterface(host='127.0.0.1')
+    except requests.exceptions.ConnectionError:
+        print(f'ConnectionError - retrying... {trynum}')
+        continue
     
-chrome = PyChromeDevTools.ChromeInterface()
+if(chrome == None):
+    raise Exception('ConnectionError: Could not connect to Chromium')
 
 chrome.Network.enable()
 chrome.Page.enable()
+chrome.Page.setAdBlockingEnabled()
 
+
+start_time=time.time()
 #chrome.Page.navigate(url="https://sinalpublico.com/player3/ch.php?canal=espn4")
-#event,messages=chrome.wait_event("Page.frameStoppedLoading", timeout=60)
+
+
+event,messages=chrome.wait_event("Page.frameStoppedLoading", timeout=60)
+
+frameTree = chrome.Page.getFrameTree()
+#for frame in frameTree:
+#    print('111', frame)
 #
 #
 #for m in messages:
@@ -43,7 +62,11 @@ chrome.Page.enable()
 #        except:
 #            pass
         
-#value = chrome.wait_event("Network.responseReceived", timeout=60)
+value = chrome.wait_event("Network.responseReceived", timeout=60)
+chrome.wait_event("Page.loadEventFired", timeout=60)
+end_time=time.time()
+print ("Page Loading Time:", end_time-start_time)
+
 #print('finished')
 #reqid = value[0]['params']['requestId']
 #print("reqid: ", reqid)
@@ -54,10 +77,11 @@ chrome.Page.enable()
     #print(response)
         
 #value = chrome.wait_event("DOMDebugger.getEventListeners", timeout=5)
-time.sleep(1)
+#time.sleep(3)
 
 file_js = "onSubmit()"
-chrome.Runtime.evaluate(expression=file_js)
+aa = chrome.Runtime.evaluate(expression=file_js)
+print(aa)
 
 message=chrome.wait_message()
 reqid = message['params']['requestId']
@@ -86,12 +110,17 @@ for script in scripts:
         pattern = r"\"(.*?)\""
         matches = re.findall(pattern, code)
         streamLinks = [match for match in matches if 'm3u8' in match]
+        
+        
+#time.sleep(450)
+chrome.Page.close()
 
-pid = p.pid
-parent = psutil.Process(pid)
-for child in parent.children(recursive=True):  # or parent.children() for recursive=False
-    child.kill()
-parent.kill()
+
+#pid = p.pid
+#parent = psutil.Process(pid)
+#for child in parent.children(recursive=True):  # or parent.children() for recursive=False
+#    child.kill()
+#parent.kill()
 
 terminal = videoThread(streamLinks[0], 'https://link.encrypted-encrypted-encrypted-encrypted-encrypted-encrypted.link')
 terminal.start()
