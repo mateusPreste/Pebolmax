@@ -29,7 +29,7 @@ class videoThread (threading.Thread):
         if(self.origin==''):
             cmd = f'vlc \"$(yt-dlp --get-url --format best \'{self.endpoint}\')\"'
 
-        print(cmd)
+        #print(cmd)
 
         if os.name == 'nt':
             self.interpreter(cmd.replace("\'", "\"").replace('&', '^&'))

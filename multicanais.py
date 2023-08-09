@@ -7,8 +7,9 @@ from sportsonline import SportsOnline
 from cloudflare import CloudFlareHandler
 from videoThreads import videoThread
 from playertv import PlayerTV
+from redecanais import RedeCanais
 
-supported_sources = ['embedflix', 'v3.sportsonline.sx', 'youtube.com', 'cloudflarestream', 'playertv']
+supported_sources = ['embedflix', 'v3.sportsonline.sx', 'youtube.com', 'cloudflarestream', 'playertv', 'sinalpublico']
 
 def verifysource(source):
     for s in supported_sources:
@@ -37,6 +38,9 @@ def selectSource(session, source, link) -> list[str]:
         return handler.getLink()
     elif(source == 'playertv'):
         handler = PlayerTV(link)
+        return handler.getLink()
+    elif(source == 'sinalpublico'):
+        handler = RedeCanais(link)
         return handler.getLink()
     
     print('Essa fonte não é suportada')
