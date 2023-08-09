@@ -22,33 +22,51 @@ import requests
 url = 'https://sinalpublico.com/player3/ch.php?canal=espn4'
 windowoptions = '--window-position=0,0 --window-size=0,0'
 
-p = subprocess.Popen(f'chromium --remote-debugging-port=9222 --remote-allow-origins=* {windowoptions} --disable-session-crashed-bubble {url}', shell=True)
+p = subprocess.Popen(f'chromium --remote-debugging-port=9222 --remote-allow-origins=* {windowoptions} --disable-session-crashed-bubble', stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL, shell=True)
 
 #time.sleep(1)
  
 chrome = None
-for trynum in range(5):
+for trynum in range(10):
     try:      
         chrome = PyChromeDevTools.ChromeInterface(host='127.0.0.1')
     except requests.exceptions.ConnectionError:
         print(f'ConnectionError - retrying... {trynum}')
+        time.sleep(0.1)
         continue
+print('connected')
     
 if(chrome == None):
     raise Exception('ConnectionError: Could not connect to Chromium')
 
 chrome.Network.enable()
 chrome.Page.enable()
-chrome.Page.setAdBlockingEnabled()
+#chrome.Page.setAdBlockingEnabled()
 
 
-start_time=time.time()
-#chrome.Page.navigate(url="https://sinalpublico.com/player3/ch.php?canal=espn4")
+#chrome.Fetch.enable(patterns=['*'])
+#print('enabled')
 
+chrome.Page.navigate(url="https://sinalpublico.com/player3/ch.php?canal=espn4")
+
+
+#while(True):
+#    messages=chrome.wait_message(timeout=60)
+#    if('method' in messages):
+#        messageMethod = messages['method']
+#        if(messageMethod == 'Page.frameStoppedLoading'):
+#            frameId = messages['params']['frameId'] 
+#            print(messages)
+#            result = chrome.Page.getResourceContent(frameId=frameId)
+#            thismessage = result[1][0]
+            #if('method' in thismessage):
+                #print(thismessage)
 
 event,messages=chrome.wait_event("Page.frameStoppedLoading", timeout=60)
+event,messages=chrome.wait_event("Page.frameStoppedLoading", timeout=60)
 
-frameTree = chrome.Page.getFrameTree()
+start_time=time.time()
+
 #for frame in frameTree:
 #    print('111', frame)
 #
@@ -81,7 +99,7 @@ print ("Page Loading Time:", end_time-start_time)
 
 file_js = "onSubmit()"
 aa = chrome.Runtime.evaluate(expression=file_js)
-print(aa)
+print('onSubmit action:', aa)
 
 message=chrome.wait_message()
 reqid = message['params']['requestId']
@@ -95,18 +113,14 @@ body = ''
 streamLinks = []
 for r in responses:
     if(type(r) == dict):
-        js = json.dumps(r)
-        js = json.loads(js)
+        js = json.loads(json.dumps(r))
         body = js['result']['body']
-    #print(type(r))
-    #print(r)
     
 soup = BeautifulSoup(body, 'html.parser')
 scripts = soup.find_all('script')
 for script in scripts:
     code = script.get_text()
     if('player.src' in code):
-        
         pattern = r"\"(.*?)\""
         matches = re.findall(pattern, code)
         streamLinks = [match for match in matches if 'm3u8' in match]
