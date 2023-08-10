@@ -16,9 +16,11 @@ class SportsOnline():
         return page.content
 
     def getEmbed(self, url):
+        url = "https://"+url.split('//')[1]
+        
         #retriving only the domain to fill the authority header
-        authority = url.split('https://')[1].split('/')[0]
-        code = url.split('https://')[1].split('/')[-1]
+        authority = url.split('//')[1].split('/')[0]
+        code = url.split('//')[1].split('/')[-1]
 
         payload={}
         headers = {
