@@ -24,7 +24,7 @@ class videoThread (threading.Thread):
             --http-header \'DNT= 1\' \
             --http-header \'Connection= keep-alive\' \
             --http-header \'Pragma= no-cache\' \
-            --http-header \'Cache-Control= no-cache\' --player-passthrough \'https\' --player \'vlc\''
+            --http-header \'Cache-Control= no-cache\' --hls-live-edge=1  --player \'vlc\''
             
         if(self.origin==''):
             cmd = f'vlc \"$(yt-dlp --get-url --format best \'{self.endpoint}\')\"'
