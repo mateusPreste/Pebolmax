@@ -9,6 +9,7 @@ from network import NetworkSession
 
 class PlayerTV():
     def __init__(self, url):
+        print('url', url)
         self.url = url.replace(' ', '')
         self.session = NetworkSession()
     
@@ -19,7 +20,6 @@ class PlayerTV():
             'Accept-Language': 'en-US,en;q=0.5',
             'Accept-Encoding': 'gzip, deflate, br',
             'DNT': '1',
-            'Alt-Used': 'playertv.net',
             'Connection': 'keep-alive',
             'Referer': 'https://multicanais.cl/',
             'Upgrade-Insecure-Requests': '1',
