@@ -2,6 +2,8 @@ import requests
 from bs4 import BeautifulSoup
 import json
 
+import subprocess
+
 from sportsonline import SportsOnline
 from cloudflare import CloudFlareHandler
 from videoThreads import videoThread
@@ -10,6 +12,7 @@ from redecanais import RedeCanais
 from embedflix import Embedflix
 
 import time
+import os
 
 supported_sources = ['embedflix', 'v3.sportsonline.sx', 'youtube.com', 'cloudflarestream', 'playertv', 'sinalpublico']
 
@@ -127,12 +130,24 @@ def main():
         thread = videoThread(videoUrl, originUrl)
         thread.start()
         threads.append(thread)
+       
+    subprocess.Popen(f'gridplayer', shell=True)
         
+    ipList = []
     while(True):
         time.sleep(1)
         for thread in threads:
-            out = thread.subprocess.stdout.readline()
-            print(type(out))
-            print('output', out)
+            print(thread)
+            with open(thread.output.name, 'r') as r:
+                for line in r:
+                    if('127.0.0.1' in line):
+                        ip = line.replace('[cli][info]  ', '')
+                        print(ip)
+                        
+                        if(ip not in ipList):
+                            subprocess.Popen(f'gridplayer {ip}', shell=True)
+                            ipList.append(ip)
+
+            #print('err', err)
     
 main()

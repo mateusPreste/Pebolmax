@@ -6,6 +6,8 @@ from subprocess import Popen, PIPE, STDOUT
 
 import subprocess
 
+import tempfile
+
 try:
     from subprocess import DEVNULL # py3k
 except ImportError:
@@ -13,24 +15,27 @@ except ImportError:
     DEVNULL = open(os.devnull, 'wb')
     
 class videoThread (threading.Thread):
-    def __init__(self, endpoint, origin, mode='http'):
+    def __init__(self, endpoint, origin):
         threading.Thread.__init__(self)
         self.endpoint = endpoint
         self.origin = origin
-        self.thisMode = mode
 
         self.config = configparser.ConfigParser()
         self.config.read('settings.conf')
         self.subprocess = None
+        self.output = tempfile.NamedTemporaryFile()
+        self.errout = tempfile.NamedTemporaryFile()
+        self.ip = None
     
     def interpreter(self, line):
         command = os.system(f'cmd /c "{line}"')
         return command    
     
-    def mode(self, mode):
+    def mode(self):
         address = self.config['proxy']['address']
         port = self.config['proxy']['port']
-        
+        mode = str(self.config['player']['playerMode'])
+
         self.proxy = ''
 #        f'--http-proxy \"http://{address}:{port}\"'
         
@@ -56,7 +61,7 @@ class videoThread (threading.Thread):
             --http-header \'DNT= 1\' \
             --http-header \'Connection= keep-alive\' \
             --http-header \'Pragma= no-cache\' \
-            --http-header \'Cache-Control= no-cache\' {self.mode(self.thisMode)}'
+            --http-header \'Cache-Control= no-cache\' {self.mode()}'
             
         if(self.origin==''):
             cmd = f'vlc \"$(yt-dlp --get-url --format best \'{self.endpoint}\')\"'
@@ -67,4 +72,6 @@ class videoThread (threading.Thread):
             self.interpreter(cmd.replace("\'", "\"").replace('&', '^&'))
         else:
             #os.system(cmd)
-            self.subprocess = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
+            #print('cmd', cmd)
+            
+            self.subprocess = Popen(cmd, stdout=self.output, stderr=self.errout, shell=True)
