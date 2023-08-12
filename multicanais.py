@@ -14,6 +14,8 @@ from embedflix import Embedflix
 import time
 import os
 
+from terminalThread import terminalThread
+
 supported_sources = ['embedflix', 'v3.sportsonline.sx', 'youtube.com', 'cloudflarestream', 'playertv', 'sinalpublico']
 
 def verifysource(source):
@@ -27,30 +29,6 @@ def getSourceName(link):
         if s in link:
             return s
     return "UNSUPPORTED"
-
-def selectSource(session, source, link) -> list[str]:
-    link = link.replace(' ', '')
-    if(source == 'embedflix'):
-        handler = Embedflix(link)
-        return handler.getLink()
-    elif(source == 'v3.sportsonline.sx'):
-        handler = SportsOnline(link)
-        return handler.getLink()
-    elif(source == 'youtube.com'):
-        link = link.replace(' ', '').replace('\'', '')
-        return [link, '']
-    elif(source == 'cloudflarestream'):
-        handler = CloudFlareHandler(link)
-        return handler.getLink()
-    elif(source == 'playertv'):
-        handler = PlayerTV(link)
-        return handler.getLink()
-    elif(source == 'sinalpublico'):
-        handler = RedeCanais(link)
-        return handler.getLink()
-    
-    print('Essa fonte não é suportada')
-    raise RuntimeError('This source is not supported')
 
 def getTodayGames(session, url):
     get_page = session.get(url)
@@ -87,7 +65,7 @@ def getGameOptions(session, title, link):
             optionList.append([optionName, optionLink])
     return optionList
 
-def main():
+def interactive():
     session = requests.Session()
     linkList = getTodayGames(session, "https://multicanais.cl/")
     
@@ -108,46 +86,21 @@ def main():
     print(f'[-1 ] [ exibir todas simultaneamente ]')
     
     optionNumber = input('Escolha uma opção: ')
-    
-    streamlist = []
-    
-    if(optionNumber == '-1'):
-        for source, olink in optionList:
-            if(source != "UNSUPPORTED"):
-                try:
-                    [videoUrl, originUrl] = selectSource(session, source, olink)
-                    streamlist.append([videoUrl, originUrl])
-                except Exception:
-                    print('Fail')
-                
-    else:
-        source, olink = optionList[int(optionNumber)]
-        [videoUrl, originUrl] = selectSource(session, source, olink)
-        streamlist.append([videoUrl, originUrl])
-    
-    threads = []
-    for videoUrl, originUrl in streamlist:
-        thread = videoThread(videoUrl, originUrl)
-        thread.start()
-        threads.append(thread)
-       
-    subprocess.Popen(f'gridplayer', shell=True)
-        
-    ipList = []
-    while(True):
-        time.sleep(1)
-        for thread in threads:
-            print(thread)
-            with open(thread.output.name, 'r') as r:
-                for line in r:
-                    if('127.0.0.1' in line):
-                        ip = line.replace('[cli][info]  ', '')
-                        print(ip)
-                        
-                        if(ip not in ipList):
-                            subprocess.Popen(f'gridplayer {ip}', shell=True)
-                            ipList.append(ip)
+    return [optionList, optionNumber]
 
-            #print('err', err)
-    
+def main():
+    while(True):
+        [optionList, optionNumber] = interactive()
+        
+        if(optionNumber == '-1'):
+            for source, olink in optionList:
+                if(source != "UNSUPPORTED"):
+                    thread = terminalThread(source, olink)
+                    thread.start()           
+        else:
+            source, olink = optionList[int(optionNumber)]
+            thread = terminalThread(source, olink)
+            thread.start()
+            
+        subprocess.Popen(f'gridplayer', stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=True)
 main()

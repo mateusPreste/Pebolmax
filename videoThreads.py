@@ -46,7 +46,7 @@ class videoThread (threading.Thread):
             myplayer = self.config['player']['mainPlayer']
             return f'{self.proxy} --hls-live-edge=1  --player {myplayer}'
         elif(mode == 'http'):
-            return f'{self.proxy} --hls-live-edge=1  --player-external-http'
+            return f'{self.proxy} --hls-live-edge=1 --stream-segment-threads 5 --player-external-http'
     
     def run(self):
         cmd = f'streamlink \'{self.endpoint}\' best --http-header \'User-Agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/115.0\' \
@@ -64,7 +64,7 @@ class videoThread (threading.Thread):
             --http-header \'Cache-Control= no-cache\' {self.mode()}'
             
         if(self.origin==''):
-            cmd = f'vlc \"$(yt-dlp --get-url --format best \'{self.endpoint}\')\"'
+            cmd = f'gridplayer \"$(yt-dlp --get-url --format best \'{self.endpoint}\')\"'
 
         #print(cmd)
 

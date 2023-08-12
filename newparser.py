@@ -17,7 +17,7 @@ if os.name != 'nt':
     gi.require_version('Wnck','3.0')
     from gi.repository import Wnck
     
-class RedeCanais():
+class NewParser():
     def __init__(self, url, host='127.0.0.1', port=9122):
         self.url = url.replace(' ', '')
         self.windowoptions = '--window-position=0,0 --window-size=0,0'
@@ -111,98 +111,3 @@ class RedeCanais():
         link = self.parseScript(content)
 
         return [link, 'https://link.encrypted-encrypted-encrypted-encrypted-encrypted-encrypted.link']
-
-        
-
-
-
-
-    #while(True):
-    #    messages=chrome.wait_message(timeout=60)
-    #    if('method' in messages):
-    #        messageMethod = messages['method']
-    #        if(messageMethod == 'Page.frameStoppedLoading'):
-    #            frameId = messages['params']['frameId'] 
-    #            print(messages)
-    #            result = chrome.Page.getResourceContent(frameId=frameId)
-    #            thismessage = result[1][0]
-                #if('method' in thismessage):
-                    #print(thismessage)
-
-    
-
-
-
-    #for frame in frameTree:
-    #    print('111', frame)
-    #
-    #
-    #for m in messages:
-    #    #print(m)
-    #    if "method" in m and m["method"] == "Network.responseReceived":
-    #        try:
-    #            url=m["params"]["response"]["url"]
-    #     #       print (url)
-    #        except:
-    #            pass
-            
-    
-
-    #print('finished')
-    #reqid = value[0]['params']['requestId']
-    #print("reqid: ", reqid)
-    #responses = chrome.Network.getResponseBody(requestId=reqid)
-
-
-    #for reponse in responses:
-        #print(response)
-            
-    #value = chrome.wait_event("DOMDebugger.getEventListeners", timeout=5)
-    #time.sleep(3)
-
-
-#url = 'https://sinalpublico.com/player3/ch.php?canal=espn4'
-#instance = RedeCanais(url, host='127.0.0.1', port='9122')
-#instance1 = RedeCanais(url, host='127.0.0.1', port='9123')
-
-#print(instance.getLink())
-#print(instance1.getLink())
-    
-    #js = json.loads(re
-
-    #pid = p.pid
-    #parent = psutil.Process(pid)
-    #for child in parent.children(recursive=True):  # or parent.children() for recursive=False
-    #    child.kill()
-    #parent.kill()
-
-    #terminal = videoThread(streamLinks[0], 'https://link.encrypted-encrypted-encrypted-encrypted-encrypted-encrypted.link')
-    #terminal.start()
-
-    #document = chrome.DOM.getDocument(depth=-1)
-    #print(document)
-
-    #devtools idenifiers
-    #https://cdn.jsdelivr.net/npm/console-ban@4.1.0/dist/console-ban.min.js
-    #https://link.encrypted-encrypted-encrypted-encrypted-encrypted-encrypted.link/player3/devtools-detector.js
-
-    #Request interception
-    #    await Network.Enable();
-    #    await Network.enableRequestInterception({enabled: true});
-    #    Network.requestIntercepted((params) => {
-    #      let continueParams = {interceptionId: params.InterceptionId};
-    #      if (params.request.url.endsWith('.jpg')) {
-    #        // Pretend the .jpg IP address was unreachable.
-    #        continueParams.errorReason = 'AddressUnreachable';
-    #      } else if (params.hasOwnProperty('redirectStatusCode') &&
-    #                 params.redirectStatusCode == 302) {
-    #        // Pretend the server sent a 404 instead of a 302.
-    #        continueParams.rawResponse =
-    #            btoa("HTTP/1.1 404 Not Found\r\n\r\n");
-    #      } else {
-    #        // Allow the request to continue as normal.
-    #      }
-    #      Network.continueInterceptedRequest(continueParams);
-    #    });
-    #
-    #    Page.navigate({url: 'http://some-website.tld/'})

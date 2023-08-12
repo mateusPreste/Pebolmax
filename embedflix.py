@@ -46,7 +46,7 @@ class Embedflix():
         action = action.split(' ')[-1].replace('\'','')
         ip_address = requests.get('https://api.ipify.org').text
         
-        print('videoId', videoId, 'action', action)
+        #print('videoId', videoId, 'action', action)
         
         url = "https://embedflix.net/api"
 
